@@ -140,13 +140,6 @@ void MainWindow::modifiedFile(QString filepath)
     connect(thread, &QThread::finished, thread, &QObject::deleteLater);
     thread->start();
 
-    if (ui->fileDeleteValue->isChecked()){
-        QFile file(filepath);
-        bool flag_remove = file.remove();
-        if (!flag_remove)
-            addToList(filepath + ": « Файл не может быть удален »", QColor(255, 0, 0, 40));
-        addToList(filepath + ": « Файл успешно удален »", QColor(0, 255, 0, 40));
-    }
 }
 
 void MainWindow::updateProgress(QString file_path, quint64 byte){
@@ -171,6 +164,14 @@ void MainWindow::modifiedFinished(QString file_path, QString new_file_path, QStr
         else
             widget->findChild<QLabel*>("L_Result")->setText(error);
         file_widgets.remove(file_path);
+
+        if (ui->fileDeleteValue->isChecked()){
+            QFile file(file_path);
+            bool flag_remove = file.remove();
+            if (!flag_remove)
+                addToList(file_path + ": « Файл не может быть удален »", QColor(255, 0, 0, 40));
+            addToList(file_path + ": « Файл успешно удален »", QColor(0, 255, 0, 40));
+        }
     }
 }
 
@@ -185,10 +186,10 @@ void MainWindow::startTimer()
 }
 
 void MainWindow::addToList(QString text, QColor color_row, QColor color_text){
-    ui->listWidget->addItem("");
+    ui->listWidget->addItem(text);
     QListWidgetItem *item = ui->listWidget->item(ui->listWidget->count() - 1);
     item->setForeground(QBrush(color_text));
-    item->setBackground(QBrush(color_row));
+    //item->setBackground(QBrush(color_row));
 }
 
 void MainWindow::addToList(QWidget *widget){

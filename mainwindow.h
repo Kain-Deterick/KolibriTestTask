@@ -44,7 +44,7 @@ private:
     void setInteractiveWidgets(QWidget* wiget, bool interactive);
     void modifiedFile(QString filepath);
     void startTimer();
-    void addToList(QString text, QColor color_row = Qt::black, QColor color_text = Qt::white);
+    void addToList(QString text, QColor color_row = Qt::white, QColor color_text = Qt::black);
     void addToList(QWidget* widget);
     QFileInfoList getFilesFromMask(QString dir_path, QString mask);
     QWidget* loadUI(QString file_path);
