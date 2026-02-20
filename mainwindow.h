@@ -42,8 +42,9 @@ private:
     bool checkMask();
     bool checkFiles;
     void setInteractiveWidgets(QWidget* wiget, bool interactive);
-    void modifiedFile(QString filepath);
+    void modifiedFile(const QString _filePath);
     void startTimer();
+    void CreateWidget(const QString filepath);
     void addToList(QString text, QColor color_row = Qt::white, QColor color_text = Qt::black);
     void addToList(QWidget* widget);
     QFileInfoList getFilesFromMask(QString dir_path, QString mask);

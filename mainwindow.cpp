@@ -53,8 +53,10 @@ void MainWindow::startModifiedFiles()
     QFileInfoList files = getFilesFromMask(ui->workDir->text(), ui->mask->text());
     if (files.isEmpty())
         addToList("Файлы по заданной маске не найдены");
-    for (auto file_info: files)
+    for (auto& file_info: files)
+    {
         modifiedFile(file_info.filePath());
+    }
 
     startTimer();
 }
@@ -107,39 +109,47 @@ QFileInfoList MainWindow::getFilesFromMask(QString dir_path, QString mask){
     return dir.entryInfoList(QDir::Files);
 }
 
-void MainWindow::modifiedFile(QString filepath)
+void MainWindow::modifiedFile(const QString filePath)
+{
+    CreateWidget(filePath);
+
+    ShifrFile* modified_file = new ShifrFile(filePath);
+    modified_file->setOutputDir(ui->outputDir->text());
+    modified_file->setOverwrite(ui->overWriteValue->isChecked());
+    modified_file->setXorKey(ui->xorValue->text());
+
+
+    QThread* thread = new QThread(this);
+    modified_file->moveToThread(thread);
+
+    connect(thread, &QThread::started, modified_file, &ShifrFile::workWithFile);
+    connect(modified_file, &ShifrFile::progressByte, this, &MainWindow::updateProgress);
+    connect(modified_file, &ShifrFile::fileFinished, this, &MainWindow::modifiedFinished);
+    connect(modified_file, &ShifrFile::fileFinished, thread, &QThread::quit);
+    connect(modified_file, &ShifrFile::fileFinished, modified_file, &ShifrFile::deleteLater);
+    connect(thread, &QThread::finished, thread, &QObject::deleteLater);
+
+    thread->start();
+
+}
+
+void MainWindow::CreateWidget(const QString filepath)
 {
     if (file_widgets.contains(filepath)) {
         addToList(filepath + ": Уже обрабатывается!", QColor(255, 165, 0, 40));
         return;
     }
-
     QWidget* widget = loadUI(":/fileProgress.ui");
     if (!widget)
+    {
         return;
+    }
     addToList(widget);
-
-    ShifrFile* modified_file = new ShifrFile(filepath);
-    modified_file->setOutputDir(ui->outputDir->text());
-    modified_file->setOverwrite(ui->overWriteValue->isChecked());
-    modified_file->setXorKey(ui->xorValue->text());
 
     file_widgets[filepath] = widget;
     widget->findChild<QLabel*>("L_filePath")->setText(filepath);
-    widget->findChild<QLabel*>("L_Size")->setText(QString::number(modified_file->getSizeFile()));
+    widget->findChild<QLabel*>("L_Size")->setText(QString::number(QFileInfo(filepath).size()));
     widget->findChild<QLabel*>("L_Result")->setText("В обработке...");
-
-
-    QThread* thread = new QThread(this);
-    modified_file->moveToThread(thread);
-    connect(thread, &QThread::started, modified_file, &ShifrFile::startModified);
-    connect(modified_file, &ShifrFile::progressByte, this, &MainWindow::updateProgress);
-    connect(modified_file, &ShifrFile::finished, this, &MainWindow::modifiedFinished);
-    connect(modified_file, &ShifrFile::finished, thread, &QThread::quit);
-    connect(modified_file, &ShifrFile::finished, modified_file, &ShifrFile::deleteLater);
-    connect(thread, &QThread::finished, thread, &QObject::deleteLater);
-    thread->start();
-
 }
 
 void MainWindow::updateProgress(QString file_path, quint64 byte){

@@ -8,44 +8,47 @@
 #include <QFile>
 #include <QRegularExpression>
 #include <QDir>
+#include <QLabel>
+#include <QMutex>
+#include <memory.h>
+
+#include "fileworker.h"
 
 class ShifrFile : public QObject
 {
     Q_OBJECT
-public:
-    ShifrFile(QObject *parent = nullptr);
-    ShifrFile(QString _filePath, QObject *parent = nullptr);
 
-    void setFilepath(QString file_path);
+public:
+    explicit ShifrFile(QObject *parent = nullptr);
+    ShifrFile(const QString _filePath, QObject *parent = nullptr);
+
     void setXorKey(QString xor_key);
-    void setOutputDir(QString path);
     void setOverwrite(bool mode);
+    void setOutputDir(QString path);
 
     bool getOverwrite();
-    QString getFilename();
-    QString getFilepath();
     QString getXorKey();
     QString getOutputDir();
-    quint64 getSizeFile();
     QString getLastError();
 
-    bool startModified();
-    QByteArray xorEncryptDecrypt(QByteArray data);
-private:
-    bool modifiedFile();
-    bool openFile();
+public slots:
+    bool workWithFile();
+
+signals:
+    void progressByte(QString file_path, quint64 byte);
+    void fileFinished(QString file_path, QString new_file_path, QString error);
 
 private:
     QString filePath;
     QString xorKey;
     QString outputDir;
     QString error_buf;
-    bool overwrite;
-    QFile file;
+    QMutex mutex;
+    bool overWrite;
 
-signals:
-    void progressByte(QString file_path, quint64 byte);
-    void finished(QString file_path, QString new_file_path, QString error);
+private:
+    bool createModifiedFile (const std::shared_ptr<fileWorker>& fileW);
+    QByteArray xorEncryptDecrypt(QByteArray data);
 };
 
 #endif // SHIFRFILE_H
