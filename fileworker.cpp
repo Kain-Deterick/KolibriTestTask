@@ -9,13 +9,19 @@ fileWorker::~fileWorker()
 }
 bool fileWorker::openFile()
 {
+    //qInfo(logInfo()) << "Class - fileWorker, openFile";
+
     sourceFile.setFileName(filePath);
-    if (sourceFile.isOpen()){
+    if (sourceFile.isOpen())
+    {
+        qInfo(logWarning()) << "Class - fileWorker, openFile::(Ошибка, файл уже открыт)";
         errorBuf = "Ошибка, файл уже открыт";
         return false;
     }
 
-    if (!sourceFile.open(QIODevice::ReadOnly)){
+    if (!sourceFile.open(QIODevice::ReadOnly))
+    {
+        qInfo(logWarning()) << "Class - fileWorker, openFile::(Ошибка открытия файла)";
         errorBuf = "Ошибка открытия файла";
         return false;
     }
@@ -26,6 +32,7 @@ bool fileWorker::openFile()
 
 QString fileWorker::getModifiedFileName()
 {
+    //qInfo(logInfo()) << "Class - fileWorker, getModifiedFileName";
     QString modifiedFileName;
 
     if (overWrite){

@@ -28,6 +28,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         resources.qrc
         fileProgress.ui
         fileworker.h fileworker.cpp
+        loggingcategorie.h loggingcategorie.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Kolibri_test_2026 APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

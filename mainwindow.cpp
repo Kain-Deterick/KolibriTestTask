@@ -5,6 +5,8 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    qInfo(logInfo()) << "Class - MainWindow, Constructor.";
+
     ui->setupUi(this);
     ui->surveyTime->setEnabled(false);
 
@@ -30,29 +32,40 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    qInfo(logInfo()) << "Class - MainWindow, Destructor.";
+
     delete ui;
 }
 
 void MainWindow::selectWorkFolder()
 {
+    qInfo(logInfo()) << "Class - MainWindow, selectWorkFolder.";
+
     QString path = QFileDialog::getExistingDirectory(this);
     path.isEmpty() ? ui->workDir->setText(QDir::currentPath()) : ui->workDir->setText(path);
 }
 
 void MainWindow::selectSaveFolder()
 {
+    qInfo(logInfo()) << "Class - MainWindow, selectSaveFolder.";
+
     QString path = QFileDialog::getExistingDirectory(this);
     ui->outputDir->setText(path);
 }
 
 void MainWindow::startModifiedFiles()
 {
+    qInfo(logInfo()) << "Class - MainWindow, startModifiedFiles.";
+
     if (!checkOutputDir()) return;
     if (!checkMask()) return;
 
     QFileInfoList files = getFilesFromMask(ui->workDir->text(), ui->mask->text());
     if (files.isEmpty())
+    {
+        qInfo(logWarning()) << "Class - MainWindow, startModifiedFiles::files.isEmpty()";
         addToList("Файлы по заданной маске не найдены");
+    }
     for (auto& file_info: files)
     {
         modifiedFile(file_info.filePath());
@@ -61,14 +74,20 @@ void MainWindow::startModifiedFiles()
     startTimer();
 }
 
-void MainWindow::stopModifiedFiles(){
+void MainWindow::stopModifiedFiles()
+{
+    qInfo(logInfo()) << "Class - MainWindow, stopModifiedFiles.";
+
     timer->stop();
     ui->Start->setVisible(true);
     ui->Stop->setVisible(false);
     setInteractiveWidgets(ui->Setting, true);
 }
 
-void MainWindow::setInteractiveWidgets(QWidget* widget, bool interactive){
+void MainWindow::setInteractiveWidgets(QWidget* widget, bool interactive)
+{
+    qInfo(logInfo()) << "Class - MainWindow, setInteractiveWidgets.";
+
     if (widget){
         QList<QWidget*> children = ui->Setting->findChildren<QWidget*>();
         for (QWidget* child : children)
@@ -78,8 +97,11 @@ void MainWindow::setInteractiveWidgets(QWidget* widget, bool interactive){
 
 bool MainWindow::checkOutputDir()
 {
+    qInfo(logInfo()) << "Class - MainWindow, checkOutputDir.";
+
     if(ui->outputDir->text().isEmpty())
     {
+        qInfo(logWarning()) << "Class - MainWindow, checkOutputDir::(files.isEmpty(Путь для сохранения файлов не выбран))";
         QMessageBox::warning(this, "Ошибка", "Путь для сохранения файлов не выбран");
         return false;
     }
@@ -88,16 +110,22 @@ bool MainWindow::checkOutputDir()
 
 bool MainWindow::checkMask()
 {
+    qInfo(logInfo()) << "Class - MainWindow, checkMask.";
+
     QString xor_key = ui->xorValue->text().replace(".", "");
     size_t count_point = (ui->xorValue->maxLength())- (ui->xorValue->text().count("."));
-    if (xor_key.size() != count_point){
+    if (xor_key.size() != count_point)
+    {
+        qInfo(logWarning()) << "Class - MainWindow, checkMask::XOR";
         QMessageBox::warning(this, "Ошибка", "Значение XOR должно иметь " + QString::number(count_point) + " символов");
         return false;
     }
     return true;
 }
 
-QFileInfoList MainWindow::getFilesFromMask(QString dir_path, QString mask){
+QFileInfoList MainWindow::getFilesFromMask(QString dir_path, QString mask)
+{
+    qInfo(logInfo()) << "Class - MainWindow, getFilesFromMask";
     QDir dir(dir_path);
     QStringList list_mask = ui->mask->text().split(',');
     for (QString &maskValue: list_mask){
@@ -111,6 +139,8 @@ QFileInfoList MainWindow::getFilesFromMask(QString dir_path, QString mask){
 
 void MainWindow::modifiedFile(const QString filePath)
 {
+    qInfo(logInfo()) << "Class - MainWindow, modifiedFile";
+
     CreateWidget(filePath);
 
     ShifrFile* modified_file = new ShifrFile(filePath);
@@ -135,13 +165,16 @@ void MainWindow::modifiedFile(const QString filePath)
 
 void MainWindow::CreateWidget(const QString filepath)
 {
+    qInfo(logInfo()) << "Class - MainWindow, CreateWidget";
     if (file_widgets.contains(filepath)) {
+        qInfo(logWarning()) << "Class - MainWindow,  CreateWidget::(Уже обрабатывается!)";
         addToList(filepath + ": Уже обрабатывается!", QColor(255, 165, 0, 40));
         return;
     }
     QWidget* widget = loadUI(":/fileProgress.ui");
     if (!widget)
     {
+        qInfo(logWarning()) << "Class - MainWindow,  CreateWidget::(!widget)";
         return;
     }
     addToList(widget);
@@ -164,6 +197,8 @@ void MainWindow::updateProgress(QString file_path, quint64 byte){
 }
 
 void MainWindow::modifiedFinished(QString file_path, QString new_file_path, QString error){
+    qInfo(logInfo()) << "Class - MainWindow, modifiedFinished";
+
     if (file_widgets.contains(file_path)) {
         QWidget *widget = file_widgets[file_path];
         if (error.isEmpty())
@@ -187,6 +222,8 @@ void MainWindow::modifiedFinished(QString file_path, QString new_file_path, QStr
 
 void MainWindow::startTimer()
 {
+    qInfo(logInfo()) << "Class - MainWindow, startTimer";
+
     if (ui->periodMode->isChecked() && !timer->isActive()){
         timer->start(ui->surveyTime->value());
         ui->Start->setVisible(false);
@@ -196,6 +233,8 @@ void MainWindow::startTimer()
 }
 
 void MainWindow::addToList(QString text, QColor color_row, QColor color_text){
+    qInfo(logInfo()) << "Class - MainWindow, addToList(Text)";
+
     ui->listWidget->addItem(text);
     QListWidgetItem *item = ui->listWidget->item(ui->listWidget->count() - 1);
     item->setForeground(QBrush(color_text));
@@ -203,6 +242,8 @@ void MainWindow::addToList(QString text, QColor color_row, QColor color_text){
 }
 
 void MainWindow::addToList(QWidget *widget){
+    qInfo(logInfo()) << "Class - MainWindow, addToList(QWidget)";
+
     QListWidgetItem* item = new QListWidgetItem(ui->listWidget);
     item->setSizeHint(widget->sizeHint());
     ui->listWidget->setItemWidget(item, widget);

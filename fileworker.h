@@ -6,6 +6,8 @@
 #include <QRegularExpression>
 #include <QDir>
 
+#include "loggingcategorie.h"
+
 
 class fileWorker
 {

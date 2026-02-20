@@ -11,6 +11,8 @@ bool ShifrFile::workWithFile()
 {
     QMutexLocker locker(&mutex);
 
+    //qInfo(logInfo()) << "Class - ShifrFile, workWithFile";
+
     std::shared_ptr<fileWorker> file = std::make_shared<fileWorker>(filePath);
     file->setOutputDir(outputDir);
     file->setOverWrite(overWrite);
@@ -26,10 +28,14 @@ bool ShifrFile::workWithFile()
 
 bool ShifrFile::createModifiedFile(const std::shared_ptr<fileWorker>& fileW)
 {
+    //qInfo(logInfo()) << "Class - ShifrFile, createModifiedFile";
+
     QFile modifiedFile;
     modifiedFile.setFileName(fileW->getModifiedFileName());
 
-    if (!modifiedFile.open(QIODevice::WriteOnly | QIODevice::Truncate)){
+    if (!modifiedFile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    {
+        //qInfo(logWarning()) << "Class - ShifrFile, createModifiedFile::Ошибка открытия модифицированного файла";
         error_buf = "Ошибка открытия модифицированного файла";
         emit fileFinished(filePath, modifiedFile.fileName(), error_buf);
         return false;

@@ -13,6 +13,7 @@
 #include <memory.h>
 
 #include "fileworker.h"
+//#include "loggingcategorie.h"
 
 class ShifrFile : public QObject
 {

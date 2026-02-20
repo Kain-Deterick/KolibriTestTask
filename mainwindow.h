@@ -13,7 +13,9 @@
 #include <QDir>
 #include <QThread>
 #include <QProgressBar>
+
 #include "shifrfile.h"
+//#include "loggingcategorie.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
